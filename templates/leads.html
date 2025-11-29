@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Gestión de Leads - LeadTracker Pro{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Gestión de Leads</h1>
+            <p class="text-gray-600 mt-2">Visualiza y gestiona todos tus contactos potenciales</p>
+        </div>
+        <a href="{{ url_for('index') }}" 
+           class="mt-4 md:mt-0 bg-primary hover:bg-secondary text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
+            <i class="fas fa-plus-circle mr-2"></i>Nuevo Lead
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-primary">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Total Leads</p>
+                    <p class="text-2xl font-bold text-gray-800">{{ leads|length }}</p>
+                </div>
+                <i class="fas fa-users text-primary text-2xl"></i>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Este Mes</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {{ leads|selectattr("5")|list|length }}
+                    </p>
+                </div>
+                <i class="fas fa-calendar text-green-500 text-2xl"></i>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Consultoría</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {{ leads|selectattr("4", "equalto", "Consultoría Tecnológica")|list|length }}
+                    </p>
+                </div>
+                <i class="fas fa-briefcase text-blue-500 text-2xl"></i>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-600">Desarrollo</p>
+                    <p class="text-2xl font-bold text-gray-800">
+                        {{ leads|selectattr("4", "equalto", "Desarrollo de Software")|list|length }}
+                    </p>
+                </div>
+                <i class="fas fa-code text-purple-500 text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leads Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Información del Lead
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Contacto
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Servicio
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Fecha Registro
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for lead in leads %}
+                    <tr class="hover:bg-gray-50 transition duration-300">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 bg-primary rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold">{{ lead[1][0] }}</span>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ lead[1] }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ lead[2] }}</div>
+                            <div class="text-sm text-gray-500">{{ lead[3] or 'N/A' }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if lead[4] == 'Consultoría Tecnológica' %}bg-blue-100 text-blue-800
+                                        {% elif lead[4] == 'Desarrollo de Software' %}bg-purple-100 text-purple-800
+                                        {% elif lead[4] == 'Marketing Digital' %}bg-green-100 text-green-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ lead[4] }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ lead[5].strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('edit_lead', lead_id=lead[0]) }}" 
+                                   class="text-indigo-600 hover:text-indigo-900 transition duration-300">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="{{ url_for('delete_lead_route', lead_id=lead[0]) }}" 
+                                   class="text-red-600 hover:text-red-900 transition duration-300"
+                                   onclick="return confirm('¿Estás seguro de que quieres eliminar este lead?')">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center py-8">
+                                <i class="fas fa-inbox text-4xl text-gray-300 mb-4"></i>
+                                <p class="text-lg">No hay leads registrados</p>
+                                <p class="text-sm text-gray-500 mt-1">Comienza agregando tu primer lead</p>
+                                <a href="{{ url_for('index') }}" 
+                                   class="mt-4 bg-primary hover:bg-secondary text-white font-semibold py-2 px-6 rounded-lg transition duration-300">
+                                    <i class="fas fa-plus-circle mr-2"></i>Agregar Primer Lead
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- API Info -->
+    <div class="mt-8 bg-gray-800 text-white rounded-lg p-6">
+        <h3 class="text-xl font-semibold mb-2">API Endpoint Disponible</h3>
+        <p class="text-gray-300 mb-4">Accede a tus datos a través de nuestra API RESTful:</p>
+        <code class="bg-gray-700 px-3 py-2 rounded text-sm">
+            GET {{ url_for('api_leads', _external=True) }}
+        </code>
+    </div>
+</div>
+{% endblock %}
